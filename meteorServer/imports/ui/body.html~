@@ -1,0 +1,8 @@
+<head>
+    <title>DRAW</title>
+</head>
+
+    <body>
+        <button id="makeStar" type="button" onclick="makeStar()" >Star</button>
+        <div id="feedback"></div>
+    </body>
