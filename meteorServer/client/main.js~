@@ -2,6 +2,9 @@ import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
 
 import './main.html';
-import '../imports/ui/body.js';
-import '../imports/ui/eventemitter2.min.js';
-import '../imports/ui/roslib.min.js';
+
+Template.yourLayout.created = function() {
+  $('head').append('<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js">');
+  $('head').append('<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js">');
+  $('head').append('<script type="text/javascript" src="lib/turtleChallenge.js">');
+}

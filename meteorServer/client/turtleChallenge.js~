@@ -1,9 +1,3 @@
-import { Template } from 'meteor/templating';
- 
-import './body.html';
-import './eventemitter2.min.js';
-import './roslib.min.js';
- 
 // This function connects to the rosbridge server running on the local computer on port 9090
 var rbServer = new ROSLIB.Ros({
     url : 'ws://localhost:9090'
@@ -37,6 +31,41 @@ var cmdVelTopic = new ROSLIB.Topic({
     messageType : 'geometry_msgs/Twist'
 });
 
+var pose = new ROSLIB.Topic({
+    ros : rbServer,
+    name : '/turtle1/pose',
+    messageType : 'turtlesim/Pose'
+});
+
+
+var pos = {
+  x : 0, 
+  y : 0,
+  z : 0,
+  li: 0,
+  av: 0,
+  t : 0
+};
+
+// Subscribing at turtle1/pose movements
+pose.subscribe(function(message) {
+    // only draw when position change
+    if (message.x != pos.x || message.y != pos.y || message.z != pos.z || 
+        message.theta != pos.t ||message.linear_velocity != pos.li || 
+        message.angular_velocity != pos.av){
+        //Upgrading position struct
+        pos.x = message.x;
+        pos.y = message.y;
+        document.getElementById("x").value = pos.x
+        document.getElementById("y").value = pos.y
+        pos.z = message.z;
+        pos.t = message.theta;
+        pos.li = message.linear_velocity;
+        pos.av = message.angular_velocity;
+        drawTo(pos.x,pos.y);
+    }
+});
+
 // These lines create a message that conforms to the structure of the Twist defined in our ROS installation
 // It initalizes all properties to zero. They will be set to appropriate values before we publish this message.
 var twist = new ROSLIB.Message({
@@ -52,7 +81,7 @@ var twist = new ROSLIB.Message({
     }
 });
 
-function drawLine(lx, az) {
+function makeMove(lx, az) {
         //This is how to post an order to make a line
         var linearX = lx;
         var angularZ = az;
@@ -66,10 +95,34 @@ function makeStar(){
     //The timeout is for waiting the server make movement(s)
     for(var i = 0; i<6; i++){
         setTimeout(function(){
-          drawLine(2.5,0.0);
+          makeMove(2.5,0.0);
         }, 2*i*1000); 
         setTimeout(function(){
-          drawLine(0.0,-2.525252);
+          makeMove(0.0,-2.525252);
         }, 2*i*1000 + 1000);
   }
+}
+
+var stateX;
+var stateY;
+
+function drawTo(x,y) {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var xScaled = x*500/11;
+    var yScaled = 500-(y*500/11);
+    ctx.beginPath();
+    ctx.lineWidth = "2";
+    ctx.strokeStyle = "white";
+    if(stateX == null){
+        stateX = xScaled;
+    }
+    if(stateY == null){
+        stateY = yScaled;
+    }
+    ctx.moveTo(stateX,stateY);
+    ctx.lineTo(xScaled,yScaled);
+    ctx.stroke();
+    stateX = xScaled;
+    stateY = yScaled;
 }

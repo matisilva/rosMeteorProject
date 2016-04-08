@@ -1,133 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- Based on demo found here:
-http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
-http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality
--->
-
-<!--
-The next two lines bring in the JavaScript files that support rosbridge integration.
--->
-<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
-<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
-
-<script type="text/javascript" type="text/javascript">
-
-// This function connects to the rosbridge server running on the local computer on port 9090
-var rbServer = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
- });
-
- // This function is called upon the rosbridge connection event
- rbServer.on('connection', function() {
-     // Write appropriate message to #feedback div when successfully connected to rosbridge
-     var fbDiv = document.getElementById('feedback');
-     fbDiv.innerHTML += "<p>Connected to websocket server.</p>";
- });
-
-// This function is called when there is an error attempting to connect to rosbridge
-rbServer.on('error', function(error) {
-    // Write appropriate message to #feedback div upon error when attempting to connect to rosbridge
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Error connecting to websocket server.</p>";
-});
-
-// This function is called when the connection to rosbridge is closed
-rbServer.on('close', function() {
-    // Write appropriate message to #feedback div upon closing connection to rosbridge
-    var fbDiv = document.getElementById('feedback');
-    fbDiv.innerHTML += "<p>Connection to websocket server closed.</p>";
- });
-
-// These lines create a topic object as defined by roslibjs
-var cmdVelTopic = new ROSLIB.Topic({
-    ros : rbServer,
-    name : '/turtle1/cmd_vel',
-    messageType : 'geometry_msgs/Twist'
-});
-
-var pose = new ROSLIB.Topic({
-    ros : rbServer,
-    name : '/turtle1/pose',
-    messageType : 'turtlesim/Pose'
-});
-
-
-var pos = {
-  x : 0, 
-  y : 0,
-  z : 0,
-  li: 0,
-  av: 0,
-  t : 0
-};
-
-// Subscribing at turtle1/pose movements
-pose.subscribe(function(message) {
-    // only draw when position change
-    if (message.x != pos.x || message.y != pos.y || message.z != pos.z || 
-        message.theta != pos.t ||message.linear_velocity != pos.li || 
-        message.angular_velocity != pos.av){
-        //Upgrading position struct
-        pos.x = message.x;
-        pos.y = message.y;
-        pos.z = message.z;
-        pos.t = message.theta;
-        pos.li = message.linear_velocity;
-        pos.av = message.angular_velocity;
-        console.log(pos);
-    }
-});
-
-// These lines create a message that conforms to the structure of the Twist defined in our ROS installation
-// It initalizes all properties to zero. They will be set to appropriate values before we publish this message.
-var twist = new ROSLIB.Message({
-    linear : {
-        x : 0.0,
-        y : 0.0,
-        z : 0.0
-    },
-    angular : {
-        x : 0.0,
-        y : 0.0,
-        z : 0.0
-    }
-});
-
-function drawLine(lx, az) {
-        //This is how to post an order to make a line
-        var linearX = lx;
-        var angularZ = az;
-        twist.linear.x = linearX;
-        twist.angular.z = angularZ;
-        cmdVelTopic.publish(twist);
-}
-
-function makeStar(){
-    //This is an example of drawing
-    //The timeout is for waiting the server make movement(s)
-    for(var i = 0; i<6; i++){
-        setTimeout(function(){
-          drawLine(2.5,0.0);
-        }, 2*i*1000); 
-        setTimeout(function(){
-          drawLine(0.0,-2.525252);
-        }, 2*i*1000 + 1000);
-  }
-}
-
-</script>
-
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 </head>
 <body>
-    <div>
-    <button id="makeStar" type="button" onclick="makeStar()" >Star</button>
+
+<div class="container">
+  <h2>Turtlesim example</h2>
+    <div class="col-lg-5">
+      <label for="x">X:</label>
+      <input class="form-control" id="x">
+      <br>
+      <label for="y">Y:</label>
+      <input class="form-control" id="y">
+      <br>
+      <div>
+        <label id="feedback"></label>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="makeStar" type="button" onclick="makeStar()" >Draw star</button>
+      </div>
     </div>
-    <div id="feedback"></div>
-    <div>
-      <canvas id="turtle" width="300" height="300" style="border:3px solid #000000;background:#0000ff;">
-      </canvas>
+    <div class="col-lg-7">
+        <canvas id="canvas" height="500" width="500" style="border:3px;background:#0000ff"></canvas>
     </div>
+</div>
+
 </body>
+
+<!--The next two lines bring in the JavaScript files that support rosbridge integration.-->
+
+<script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="main.js"></script>
+<script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
 </html>
