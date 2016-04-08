@@ -43,3 +43,8 @@ $ meteor
 ```
 http://localhost:3000
 ```
+##Screen captures
+
+![Init position](scr1.png)
+![Moving](scr2.png)
+![Star finished](scr3.png)
